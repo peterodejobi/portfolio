@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Home | Peter Odejobi</title>
+    <script>document.documentElement.classList.add('js'); try { if (sessionStorage.seen) document.documentElement.classList.add('seen') } catch (e) { }</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300..900;1,300..900&family=IBM+Plex+Mono&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="grain" aria-hidden="true"></div>
+    <div class="cursor" aria-hidden="true"><i class="dot"></i><i class="ring"><u><b></b></u></i></div>
+    <div class="peek" aria-hidden="true">
+        <div class="pc"><img alt=""><span></span></div>
+    </div>
+    <header class="pill"><a class="pi" href="mailto:peter@example.com" aria-label="Email Peter"><svg viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="1.6">
+                <rect x="3" y="5" width="18" height="14" rx="2" />
+                <path d="m3 7 9 6 9-6" />
+            </svg></a><a class="pl" href="index.html" aria-label="Home">O</a>
+        <button class="burger" aria-expanded="false" aria-controls="menu" aria-label="Open menu"><i></i><i></i></button>
+    </header>
+    <div id="menu" class="menu" aria-hidden="true">
+        <ul>
+            <li><a href="about.html"><em>01</em><span style="--i:0">About</span></a></li>
+            <li><a href="projects.html"><em>02</em><span style="--i:1">Projects</span></a></li>
+            <li><a href="planner.html"><em>03</em><span style="--i:2">Planner</span></a></li>
+            <li><a href="contact.html"><em>04</em><span style="--i:3">Contact</span></a></li>
+        </ul>
+        <div class="mfoot"><a href="mailto:peter@example.com">peter@example.com</a><span>Student developer, Lagos</span>
+        </div>
+    </div>
+    <main>
+        <div id="loader" aria-hidden="true">
+            <div class="half top">
+                <div class="spec">
+                    <div class="meta tl">Inter</div>
+                    <div class="meta tr wl">Light 300</div>
+                    <div class="meta bl">Aa Bb Cc 0123</div>
+                    <div class="gl" data-k="cap"><i></i><b>Cap height</b></div>
+                    <div class="gl" data-k="x"><i></i><b>x-height</b></div>
+                    <div class="gl" data-k="base"><i></i><b>Baseline</b></div>
+                    <div class="gl" data-k="desc"><i></i><b>Descender</b></div>
+                    <div class="word">Peter</div>
+                    <div class="tag"><span class="typed"></span><i class="caret"></i></div>
+                </div>
+            </div>
+            <div class="half bot">
+                <div class="spec">
+                    <div class="meta tl">Inter</div>
+                    <div class="meta tr wl">Light 300</div>
+                    <div class="meta bl">Aa Bb Cc 0123</div>
+                    <div class="gl" data-k="cap"><i></i><b>Cap height</b></div>
+                    <div class="gl" data-k="x"><i></i><b>x-height</b></div>
+                    <div class="gl" data-k="base"><i></i><b>Baseline</b></div>
+                    <div class="gl" data-k="desc"><i></i><b>Descender</b></div>
+                    <div class="word">Peter</div>
+                    <div class="tag"><span class="typed"></span><i class="caret"></i></div>
+                </div>
+            </div>
+        </div>
+        <section class="hero gate" id="top">
+            <div class="sway">
+                <div class="curtain"></div>
+            </div>
+            <div class="hcopy">
+                <h1 class="mg"><span class="mask"><span>Peter</span></span><span
+                        class="mask"><span>Odejobi</span></span></h1>
+                <p class="sub mg"><span class="mask"><span>Student developer learning to build for the
+                            web.</span></span></p>
+                <div class="bill"><span class="fade" style="--i:0">( Now showing )</span><span class="fade"
+                        style="--i:1">Act I &mdash; The work</span><span class="fade" style="--i:2">Act II &mdash; The
+                        process</span><span class="fade" style="--i:3">Lagos <time class="clk"></time></span><a
+                        class="fade" style="--i:4" href="#work" data-cursor="hover">Take your seat</a><a class="fade"
+                        style="--i:5" href="contact.html">Reach out</a></div>
+            </div>
+        </section>
+        <section id="about">
+            <div class="wrap big reveal">
+                <p class="lab">( Prologue )</p>
+                <p style="margin-top:1rem">Hi, I&rsquo;m <a class="w " href="about.html" data-peek="images/profile.jpg"
+                        data-cap="— About me" data-ratio="p" data-cursor="view">Peter<img src="images/profile.jpg"
+                            alt=""></a>, a Miva open university student in Lagos. [Replace with two true sentences about you.</p>
+            </div>
+        </section>
+        <section style="padding-top:0">
+            <div class="wrap big reveal">
+                <p class="lab">( The programme )</p>
+                <p style="margin-top:1rem">I build <a class="w " href="projects.html" data-peek="images/profile.jpg"
+                        data-cap="— View projects" data-ratio="" data-cursor="view">portfolios<img src="images/profile.jpg"
+                            alt=""></a>, keep coursework on track with <a class="w d" href="planner.html"
+                        data-peek="images/p2.svg" data-cap="— Try the planner" data-ratio=""
+                        data-cursor="view">planners<img src="images/p2.svg" alt=""></a>, and write <a class="w "
+                        href="contact.html" data-peek="images/p3.svg" data-cap="— Open the form" data-ratio=""
+                        data-cursor="view">forms<img src="images/p3.svg" alt=""></a> that check themselves, all from <a
+                        class="w d" href="about.html" data-peek="images/miva.jpeg" data-cap="— About me"
+                        data-ratio="p" data-cursor="view">Lagos<img src="images/miva.jpeg" alt=""></a>.</p>
+                <video controls preload="none" autoplay muted width="100%" height="50%">
+                    <source src="media/intro.mp4" type="video/mp4">Your browser does not support video.
+                </video>
+            </div>
+        </section>
+        <section class="work" id="work">
+            <div class="stage">
+                <div class="ring3d">
+                    <figure class="c3"><img src="images/p1.svg" alt="Project preview 1"><span>No. 01</span></figure>
+                    <figure class="c3"><img src="images/p2.svg" alt="Project preview 2"><span>No. 02</span></figure>
+                    <figure class="c3"><img src="images/p3.svg" alt="Project preview 3"><span>No. 03</span></figure>
+                    <figure class="c3"><img src="images/p1.svg" alt="Project preview 4"><span>No. 04</span></figure>
+                    <figure class="c3"><img src="images/p2.svg" alt="Project preview 5"><span>No. 05</span></figure>
+                    <figure class="c3"><img src="images/p3.svg" alt="Project preview 6"><span>No. 06</span></figure>
+                    <figure class="c3"><img src="images/p1.svg" alt="Project preview 7"><span>No. 07</span></figure>
+                    <figure class="c3"><img src="images/p2.svg" alt="Project preview 8"><span>No. 08</span></figure>
+                </div>
+                <div class="workcopy">
+                    <div>
+                        <p class="lab">( Act I &mdash; The work )</p>
+                        <h2>Selected projects</h2>
+                    </div><a class="btn" href="projects.html" data-cursor="hover">See all work</a>
+                </div>
+            </div>
+        </section>
+        <section class="proc">
+            <div class="wrap">
+                <p class="lab" style="margin-bottom:2rem">( Act II &mdash; The process )</p>
+                <div class="step">
+                    <div class="ln"></div>
+                    <div class="tx"><em>01</em>
+                        <h3>Understand</h3>
+                        <p>Read the brief, list who the site is for and what each page must do.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="ln"></div>
+                    <div class="tx"><em>02</em>
+                        <h3>Plan</h3>
+                        <p>Sketch the five pages, pick colours and type, and outline the planner logic.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="ln"></div>
+                    <div class="tx"><em>03</em>
+                        <h3>Build</h3>
+                        <p>Write semantic HTML, style it with CSS, then add JavaScript behaviour.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="ln"></div>
+                    <div class="tx"><em>04</em>
+                        <h3>Test</h3>
+                        <p>Check validation, the planner, small screens and keyboard use.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="ln"></div>
+                    <div class="tx"><em>05</em>
+                        <h3>Launch</h3>
+                        <p>Publish on GitHub Pages and write up how it works.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="call">
+        <div class="pelmet" aria-hidden="true"></div>
+        <div class="mg">
+            <p class="lab" style="margin:0">( Curtain call )</p>
+            <h2 class="big"><span class="mask"><span>Let&rsquo;s make</span></span><span class="mask"><span>something
+                        together.</span></span></h2>
+            <a class="mail fade" href="mailto:peter@example.com" data-cursor="email">peter@example.com</a>
+            <p class="fade" style="--i:1"><a href="projects.html">Projects</a><a href="planner.html">Planner</a><a
+                    href="https://github.com/YOUR-USERNAME/YOUR-REPO">GitHub</a></p>
+            <p class="fade" style="--i:2">Lagos <time class="clk"></time> &middot; &copy; 2026 Peter Odejobi</p>
+        </div>
+    </footer>
+    <script src="script.js"></script>
+    <script src="motion.js"></script>
+</body>
+
+</html>

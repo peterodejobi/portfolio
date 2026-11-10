@@ -153,7 +153,9 @@ section{padding:6rem 0}
 /* ---- inner pages ---- */
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
 .card{background:var(--cream);overflow:hidden;border-radius:4px;transition:opacity .4s}
-.card .im{overflow:hidden}.card img{width:100%;display:block;transition:transform 1.2s var(--ease)}.card:hover img{transform:scale(1.04)}
+.card .im{overflow:hidden;aspect-ratio:600/564;background:var(--cream)}
+.card .im img,.card img{width:100%;height:100%;aspect-ratio:600/564;object-fit:cover;object-position:center 15%;display:block;transition:transform 1.2s var(--ease)}
+.card:hover img{transform:scale(1.04)}
 .card .tx2{padding:1.2rem 1.3rem 1.5rem}.card h3{font-size:1.6rem;margin-bottom:.4rem}.grid:hover .card:not(:hover){opacity:.5}
 table{width:100%;border-collapse:collapse}th,td{padding:.9rem .6rem;border-bottom:1px solid rgba(16,16,16,.25);text-align:left}th{font:400 .78rem var(--mono);text-transform:uppercase}
 ul.list{padding-left:1.2rem}ul.list li{margin:.3rem 0}h2.s{font-size:clamp(1.8rem,4vw,2.8rem);margin-bottom:1rem}

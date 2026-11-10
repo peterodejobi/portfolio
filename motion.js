@@ -134,30 +134,258 @@
     });
   }
 
-  /* ---------- Act I: pinned pile that becomes a 3D ring ---------- */
-  const work = $('.work');
-  if (work) {
-    const stage = $('.stage', work), ringEl = $('.ring3d', work), cards = $$('.c3', work), cp = $('.workcopy', work);
-    let mx = 0, my = 0, pm = 0, pn = 0;
-    addEventListener('pointermove', e => { mx = e.clientX / innerWidth - 0.5; my = e.clientY / innerHeight - 0.5; });
-    subs.push(() => {
-      const r = work.getBoundingClientRect();
-      if (r.bottom < 0 || r.top > innerHeight) return;                          // skip work when off-screen
-      const p = reduce ? 1 : clamp(-r.top / (r.height - innerHeight));
-      pm = lerp(pm, mx, 0.06); pn = lerp(pn, my, 0.06);                         // eased mouse parallax
-      const drop = smooth(p / 0.18), spread = smooth((p - 0.18) / 0.32);
-      const R = innerHeight * (0.22 + 0.22 * smooth((p - 0.42) / 0.58));
-      const turn = (Math.PI / 2) * clamp((p - 0.2) / 0.8), tilt = lerp(26, 9, smooth(p));
-      ringEl.style.transform = `translateY(${(1 - drop) * -30}vh) rotateX(${tilt - pn * 5}deg) rotateY(${pm * 7}deg)`;
-      cards.forEach((c, i) => {
-        const a = (i / cards.length) * Math.PI * 2 + turn;
-        const px = Math.sin(i * 12.9) * 70, py = Math.cos(i * 7.3) * 50, pr = Math.sin(i * 5.1) * 12;   // messy pile
-        const x = lerp(px, Math.sin(a) * R * 1.7, spread), y = lerp(py, 0, spread), z = lerp(i * 2, Math.cos(a) * R, spread);
-        c.style.transform = `translate3d(${x}px,${y}px,${z}px) translate(-50%,-50%) rotate(${lerp(pr, 0, spread)}deg)`;
+  /* ---------- Act I: photo cards — peel, pile, spread, ring (from oyin.design spec) ---------- */
+  const rwRoot = $('.rw-root');
+  if (rwRoot) {
+    const stage = $('.rw-stage', rwRoot) || rwRoot;
+    const cards = $$('[data-card]', rwRoot);
+    const copy = $('[data-copy]', rwRoot);
+    const n = cards.length;
+    const TILT = [-2, 2, -1, 2, 2, -2, -2, 1];
+    const PILE = [4, -5, 3, -2, 6, -6, 2, -3];
+    const thumbKeys = ['product', null, 'system', null, 'brand', null, 'proto', null];
+    const thumbs = thumbKeys.map(k => k ? document.querySelector('.dc-thumb[data-thumb="' + k + '"]') : null);
+    const PERSPECTIVE = 1400;
+    const QUARTER = Math.PI / 2;
+    const S1 = Math.sin(Math.PI / 8), S3 = Math.sin(3 * Math.PI / 8);
+
+    let peel = reduce ? 1 : 0, p = reduce ? 1 : 0;
+    let hovered = -1;
+    const lift = cards.map(() => 0);
+    const liftTarget = cards.map(() => 0);
+    const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
+
+    addEventListener('pointermove', e => {
+      mouse.tx = (e.clientX / innerWidth - 0.5) * 2;
+      mouse.ty = (e.clientY / innerHeight - 0.5) * 2;
+    }, { passive: true });
+
+    // Helpers
+    const clamp01 = v => Math.min(1, Math.max(0, v));
+    const smoothStep = t => { t = clamp01(t); return t * t * (3 - 2 * t); };
+    const range = (v, a, b) => smoothStep((v - a) / (b - a));
+    const lrp = (a, b, t) => a + (b - a) * t;
+    const rad = d => d * Math.PI / 180;
+    const angleOf = i => (i / n) * Math.PI * 2 - QUARTER;
+
+    // Sub-ranges
+    const SPREAD = [0.18, 0.50], EXPAND = [0.42, 1.00];
+    const SPREAD_M = [0.15, 0.42], EXPAND_M = [0.22, 1.00];
+
+    // Hover & Click
+    cards.forEach((el, i) => {
+      el.addEventListener('pointerenter', () => {
+        if (p < 0.92) return;
+        hovered = i; el.classList.add('is-hover'); liftTarget[i] = 1;
       });
-      const o = smooth((p - 0.78) / 0.17);
-      cp.style.opacity = o; cp.style.transform = `translateY(${(1 - o) * 20}px)`;
-      stage.classList.toggle('live', p > 0.92);
+      el.addEventListener('pointerleave', () => {
+        if (hovered === i) hovered = -1;
+        el.classList.remove('is-hover'); liftTarget[i] = 0;
+      });
+      el.addEventListener('click', () => {
+        const href = el.dataset.href;
+        if (href && p > 0.92) location.href = href;
+      });
+    });
+
+    function renderCards() {
+      const W = innerWidth, H = innerHeight, mobile = W < 720;
+      const rect = rwRoot.getBoundingClientRect();
+      const sTop = rect.top;
+
+      // Compute peel from section top (72% → 0%)
+      const peelRaw = reduce ? 1 : clamp01((H * 0.72 - sTop) / (H * 0.72));
+      peel = lrp(peel, peelRaw, 0.14);
+
+      // Compute p from pinned progress (once top hits viewport top, over 260% / 180% of vh)
+      const pinTravel = H * (mobile ? 1.8 : 2.6);
+      const pRaw = reduce ? 1 : clamp01(-sTop / pinTravel);
+      p = lrp(p, pRaw, 0.14);
+
+      // Mouse chase
+      mouse.x += (mouse.tx - mouse.x) * 0.06;
+      mouse.y += (mouse.ty - mouse.y) * 0.06;
+
+      // Lift tweening for hovers
+      for (let i = 0; i < n; i++) {
+        lift[i] += (liftTarget[i] - lift[i]) * 0.14;
+        if (Math.abs(lift[i] - liftTarget[i]) < 0.001) lift[i] = liftTarget[i];
+      }
+
+      // Restore thumbnails if scrolled back above peel
+      if (peel <= 0.02) {
+        thumbs.forEach(th => { if (th) th.style.visibility = ''; });
+      }
+
+      // Stage center in viewport coordinates
+      const stageRect = stage.getBoundingClientRect();
+      const stageCenterX = stageRect.left + stageRect.width / 2;
+      const stageCenterY = stageRect.top + stageRect.height / 2;
+
+      // Scene values
+      const late = clamp01((peel - 0.6) / 0.4);
+      const drop = clamp01(p / 0.3);
+      const liftAmt = drop > 0 ? 0.3 + 0.7 * (1 - (1 - drop) ** 2) : 0.3 * late * late;
+      const b = range(p, ...(mobile ? SPREAD_M : SPREAD));
+      const x = range(p, ...(mobile ? EXPAND_M : EXPAND));
+
+      const Rbig = Math.min(H * 0.44, (W / 2) * 0.75);
+      const Rsmall = Math.min(W, H) * 0.2;
+      const R = lrp(Rsmall, Rbig, x) * b;
+
+      const cardW = cards[0].offsetWidth || 160;
+      const cardH = (cardW / 0.88) * 1.08;
+
+      // Superellipse parameters for mobile ring
+      const yMin = copy.offsetHeight / 2 + 8 + cardH / 2;
+      const yMax = Math.max(yMin, Math.min(yMin + cardH + 6, H / 2 - 84 - cardH / 2));
+      const Rx = (W / 2 - cardW * 0.56 - 6) / S3;
+      const det = S1 * (S3 ** 3) - S3 * (S1 ** 3);
+      const ca = (yMin * (S3 ** 3) - yMax * (S1 ** 3)) / det;
+      const cc = (yMax * S1 - yMin * S3) / det;
+
+      const turn = QUARTER * x + (mobile ? (Math.PI / 8) * x : 0);
+      const pileY = -H * 0.3 * (1 - liftAmt);
+      const leanX = rad(lrp(26, 9, x) * b + mouse.y * 5 * b);
+      const leanY = rad(mouse.x * 7 * b);
+
+      const out = [];
+
+      for (let i = 0; i < n; i++) {
+        const el = cards[i];
+        const a = angleOf(i) + turn;
+        const pileDx = ((i % 3) - 1) * 10 * (1 - b);
+        const pileDy = -i * 3 * (1 - b);
+        const s = Math.sin(a);
+
+        // Ring target offsets relative to viewport center
+        let mx = Math.cos(a) * (mobile ? lrp(Rsmall, Rx, x) * b : R) + pileDx;
+        let my = (mobile ? lrp(s * Rsmall, ca * s + cc * (s ** 3), x) * b : s * R) + pileY + pileDy;
+
+        // Fake 3D lean + perspective
+        const rel = my - pileY;
+        const vy = pileY + rel * Math.cos(leanX);
+        let depth = rel * Math.sin(leanX);
+        const sx = mx * Math.cos(leanY);
+        depth += mx * Math.sin(leanY);
+        const k = PERSPECTIVE / (PERSPECTIVE - depth);
+        mx = sx * k;
+        my = pileY + (vy - pileY) * k;
+
+        let scaleX = lrp(0.86, 1, b) * k, scaleY = scaleX;
+        let rotate = lrp(PILE[i], TILT[i], b);
+        let alpha = 1;
+        const key = b > 0.6 ? 500 + depth : (thumbs[i] ? 200 : 100) + i;
+
+        // Target coordinates in screen/viewport space
+        let targetX = W / 2 + mx;
+        let targetY = H / 2 + my;
+
+        // Peel phase overrides (while peel < 1)
+        if (peel < 1) {
+          const t = smoothStep((peel - i * 0.05) / 0.65);
+          const th = thumbs[i];
+          if (th) {
+            const r = th.getBoundingClientRect();
+            const thumbScreenX = r.left + r.width / 2;
+            const thumbScreenY = r.top + r.height / 2;
+            const arc = Math.sin(Math.PI * t) * -60;
+
+            targetX = lrp(thumbScreenX, targetX, t);
+            targetY = lrp(thumbScreenY, targetY, t) + arc;
+            scaleX = lrp(r.width / (cardW || 1), 0.86, t);
+            scaleY = lrp(r.height / (cardH || 1), 0.86, t);
+            rotate = lrp(0, PILE[i], t) + Math.sin(Math.PI * t) * (i % 2 ? 10 : -10);
+
+            if (t > 0.02) {
+              th.style.visibility = 'hidden';
+              alpha = 1;
+            } else {
+              th.style.visibility = '';
+              alpha = 0;
+            }
+          } else {
+            alpha = t;
+            scaleX = lrp(0.6 * 0.86, 0.86, t);
+            scaleY = scaleX;
+            targetY += (1 - t) * 40;
+          }
+        } else if (!reduce && thumbs[i]) {
+          thumbs[i].style.visibility = 'hidden';
+        }
+
+        // Hover overrides
+        const F = lift[i];
+        const dim = (hovered >= 0 && hovered !== i) ? 1 : 0;
+        scaleX *= 1 + 0.12 * F;
+        scaleY *= 1 + 0.12 * F;
+        rotate *= 1 - F;
+        alpha *= 1 - 0.45 * dim * range(p, 0.9, 1);
+
+        // Convert target screen position to transforms relative to stage center
+        const finalTransformX = targetX - stageCenterX;
+        const finalTransformY = targetY - stageCenterY;
+
+        out.push({
+          el, key, lifted: F > 0.01,
+          px: finalTransformX, py: finalTransformY,
+          targetX, targetY,
+          rotate, scaleX, scaleY, alpha,
+          rotX: (leanX * 180 / Math.PI) * 0.35,
+          rotY: (-leanY * 180 / Math.PI) * 0.5
+        });
+      }
+
+      // Stacking: sort by key and resolve overlaps
+      const half = out.map(o => ({
+        x: o.targetX, y: o.targetY,
+        w: (cardW * o.scaleX) / 2, h: (cardH * o.scaleY) / 2
+      }));
+      const overlaps = (a, b) =>
+        Math.abs(half[a].x - half[b].x) < (half[a].w + half[b].w) * 1.04 &&
+        Math.abs(half[a].y - half[b].y) < (half[a].h + half[b].h) * 1.04;
+
+      const sortedIndices = out.map((_, i) => i).sort((a, b) => out[a].key - out[b].key);
+      const rank = new Map(sortedIndices.map((idx, rankIdx) => [idx, rankIdx]));
+      const left = new Set(sortedIndices), nextOrder = [];
+      while (left.size) {
+        let pick = -1;
+        for (const c of left) {
+          const free = [...left].every(o => o === c || !overlaps(o, c) || rank.get(o) > rank.get(c));
+          if (free && (pick < 0 || out[c].key < out[pick].key)) pick = c;
+        }
+        if (pick < 0) { pick = left.values().next().value; }
+        nextOrder.push(pick);
+        left.delete(pick);
+      }
+
+      nextOrder.forEach((idx, z) => {
+        const o = out[idx];
+        const { el, lifted, px, py, rotate: rot, scaleX: sx2, scaleY: sy2, alpha: al, rotX, rotY } = o;
+        el.style.transform = 'translate3d(' + px.toFixed(1) + 'px,' + py.toFixed(1) + 'px,0) rotate(' + rot.toFixed(2) + 'deg) scale(' + sx2.toFixed(4) + ',' + sy2.toFixed(4) + ') perspective(900px) rotateX(' + rotX.toFixed(2) + 'deg) rotateY(' + rotY.toFixed(2) + 'deg)';
+        el.style.opacity = al.toFixed(3);
+        el.style.visibility = al > 0.01 ? 'visible' : 'hidden';
+        el.style.zIndex = lifted ? 1000 : 100 + z;
+      });
+
+      // Copy fade
+      const c = clamp01((p - 0.78) / 0.17);
+      copy.style.opacity = c.toFixed(3);
+      copy.style.visibility = c > 0.01 ? 'visible' : 'hidden';
+      copy.style.transform = 'translate(-50%, calc(-50% + ' + ((1 - c) * 20).toFixed(1) + 'px))';
+
+      // Readiness
+      rwRoot.classList.toggle('is-ready', p > 0.92);
+    }
+
+    if (reduce) { peel = 1; p = 1; renderCards(); }
+    subs.push(() => {
+      const r = rwRoot.getBoundingClientRect();
+      if (r.bottom < -200 || r.top > innerHeight + 200) {
+        if (r.top > innerHeight * 0.72) thumbs.forEach(th => { if (th) th.style.visibility = ''; });
+        return;
+      }
+      renderCards();
     });
   }
 

@@ -108,4 +108,5 @@ Then visit `http://localhost:8000` in your browser.
 - **Institution**: Miva Open University, Lagos  
 - **Programme**: B.Sc. Data Science  
 - **Student Email**: [p.odejobi1759@miva.edu.ng](mailto:p.odejobi1759@miva.edu.ng)  
-- **GitHub**: [@Rinwaoluwa](https://github.com/Rinwaoluwa/)
+- **GitHub**: [@Rinwaoluwa](https://github.com/peterodejobi/)
+

@@ -359,19 +359,26 @@
         left.delete(pick);
       }
 
+      // Exit transition toward video section when scrolling past the pinned ring
+      const exitProgress = reduce ? 0 : clamp01((-sTop - pinTravel) / (H * 0.7));
+
       nextOrder.forEach((idx, z) => {
         const o = out[idx];
         const { el, lifted, px, py, rotate: rot, scaleX: sx2, scaleY: sy2, alpha: al, rotX, rotY } = o;
+        const exitAlpha = Math.max(0, al * (1 - exitProgress * 1.3));
+        const blurAmount = (exitProgress * 14).toFixed(1);
         el.style.transform = 'translate3d(' + px.toFixed(1) + 'px,' + py.toFixed(1) + 'px,0) rotate(' + rot.toFixed(2) + 'deg) scale(' + sx2.toFixed(4) + ',' + sy2.toFixed(4) + ') perspective(900px) rotateX(' + rotX.toFixed(2) + 'deg) rotateY(' + rotY.toFixed(2) + 'deg)';
-        el.style.opacity = al.toFixed(3);
-        el.style.visibility = al > 0.01 ? 'visible' : 'hidden';
+        el.style.opacity = exitAlpha.toFixed(3);
+        el.style.filter = exitProgress > 0.01 ? 'blur(' + blurAmount + 'px)' : '';
+        el.style.visibility = exitAlpha > 0.01 ? 'visible' : 'hidden';
         el.style.zIndex = lifted ? 1000 : 100 + z;
       });
 
       // Copy fade
       const c = clamp01((p - 0.78) / 0.17);
-      copy.style.opacity = c.toFixed(3);
-      copy.style.visibility = c > 0.01 ? 'visible' : 'hidden';
+      const copyAlpha = c * Math.max(0, 1 - exitProgress * 1.6);
+      copy.style.opacity = copyAlpha.toFixed(3);
+      copy.style.visibility = copyAlpha > 0.01 ? 'visible' : 'hidden';
       copy.style.transform = 'translate(-50%, calc(-50% + ' + ((1 - c) * 20).toFixed(1) + 'px))';
 
       // Readiness
